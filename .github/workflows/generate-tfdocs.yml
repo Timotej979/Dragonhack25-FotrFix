@@ -1,0 +1,27 @@
+name: Generate Terraform docs
+
+on:
+    push:
+      branches: [main]
+    pull_request:
+      branches: [main]
+  
+jobs:
+  generate-tfdocs:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+      
+    - name: Render terraform docs for environment-stages
+      uses: terraform-docs/gh-actions@v1.4.1
+      with:
+        working-dir: ./backend/infrastructure/
+        recursive: true
+        recursive-path: environments
+
+    - name: Render terraform docs for modules
+      uses: terraform-docs/gh-actions@v1.4.1
+      with:
+        working-dir: ./backend/infrastructure/
+        recursive: true
+        recursive-path: modules
