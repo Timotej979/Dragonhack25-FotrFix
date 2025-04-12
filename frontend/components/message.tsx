@@ -55,17 +55,19 @@ const PurePreviewMessage = ({
           })}
         >
           <div className="flex-shrink-0">
-            <Image
-              src={
-                message.role === 'user'
-                  ? `https://avatar.vercel.sh/user-avatar`
-                  : `/images/FotrFix-1.gif`
-              }
-              alt={`${message.role} avatar`}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
+          <Image
+            src={
+              message.role === 'user'
+                ? `https://avatar.vercel.sh/user-avatar`
+                : `/images/FotrFix-1.png`
+            }
+            alt={`${message.role} avatar`}
+            width={message.role === 'user' ? 40 : 48}
+            height={message.role === 'user' ? 40 : 48}
+            className="rounded-full"
+          />
+
+
           </div>
 
           <div
@@ -266,13 +268,14 @@ export const ThinkingMessage = () => {
     >
       <div className="flex items-start gap-3 mb-4">
         <div className="flex-shrink-0">
-          <Image
-            src="https://avatar.vercel.sh/assistant-avatar"
-            alt="assistant avatar"
-            width={40}
-            height={40}
-            className="rounded-full"
-          />
+        <Image
+          src="/images/FotrFix-1.png"
+          alt="assistant avatar"
+          width={48}
+          height={48}
+          className="rounded-full"
+        />
+
         </div>
 
         <div className="flex gap-4 bg-muted px-3 py-2 rounded-xl">

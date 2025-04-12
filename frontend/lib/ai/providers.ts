@@ -26,7 +26,7 @@ export const myProvider = isTestEnvironment
         // Using gemini-1.5-flash-8b instead of gemini-2.5-pro-exp-03-25
         'chat-model': google('gemini-1.5-flash-8b'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: google('gemini-1.5-flash-8b'),
+          model: google('gemini-1.5-flash'),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
         'title-model': google('gemini-1.5-flash-8b'),

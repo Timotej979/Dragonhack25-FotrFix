@@ -63,7 +63,7 @@ export const Greeting = ({ minimized = false }: GreetingProps) => {
         // You may adjust the className based on minimized state.
         // For example, when minimized, you may want a smaller max-width.
         className={`w-auto h-auto rounded-xl shadow-lg ${
-          !minimized ? 'max-w-[50%] sm:max-w-[60%] md:max-w-[60%] lg:max-w-[15%]' : 'max-w-[50px]'
+          !minimized ? 'max-w-[50%] sm:max-w-[60%] md:max-w-[60%] lg:max-w-[30%]' : 'max-w-[50px]'
         }`}
       />
     </div>
