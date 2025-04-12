@@ -77,4 +77,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <DataStreamHandler id={id} />
     </>
   );
+
+  
 }
