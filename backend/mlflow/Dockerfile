@@ -9,8 +9,7 @@ COPY ./requirements.txt ./requirements.txt
 
 RUN pip install -r requirements.txt
 
-COPY entry-point.sh /app/entry-point.sh
-COPY mlflow_auth.py /app/mlflow_auth.py
+COPY . /app/
 
 ENTRYPOINT ["/usr/bin/env", "bash", "/app/entry-point.sh"]
 
