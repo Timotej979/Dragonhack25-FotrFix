@@ -7,5 +7,5 @@ variable "environment" {
 variable "project" {
   description = "Project name"
   type        = string
-  default     = "dragonhack25-dadgpt"
+  default     = "dragonhack25-fotrfix"
 }

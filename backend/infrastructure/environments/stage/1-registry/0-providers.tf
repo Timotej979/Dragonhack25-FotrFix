@@ -15,7 +15,7 @@ terraform {
     profile        = "terraform"
     region         = "eu-central-1"
     key            = "registry.tfstate"
-    bucket         = "stage-dragonhack25-dadgpt-terraform-state"
+    bucket         = "stage-dragonhack25-fotrfix-terraform-state"
     use_lockfile   = true
     encrypt        = true
   }
