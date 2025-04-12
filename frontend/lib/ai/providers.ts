@@ -24,12 +24,12 @@ export const myProvider = isTestEnvironment
   : customProvider({
       languageModels: {
         // Using gemini-1.5-flash-8b instead of gemini-2.5-pro-exp-03-25
-        'chat-model': google('gemini-1.5-flash-8b'),
+        'chat-model': google('gemini-1.5-flash'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: google('gemini-1.5-flash-8b'),
+          model: google('gemini-1.5-flash'),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
-        'title-model': google('gemini-1.5-flash-8b'),
-        'artifact-model': google('gemini-1.5-flash-8b'),
+        'title-model': google('gemini-1.5-flash'),
+        'artifact-model': google('gemini-1.5-flash'),
       },
     });
