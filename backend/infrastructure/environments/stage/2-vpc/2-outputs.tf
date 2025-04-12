@@ -9,6 +9,12 @@ output "public_subnet_ids" {
   value       = module.vpc.public_subnet_ids
 }
 
+# Private Subnets
+output "private_subnet_ids" {
+  description = "Private Subnet IDs"
+  value       = module.vpc.private_subnet_ids
+}
+
 # Database Subnet Group
 output "database_subnet_group_name" {
   description = "Database Subnet Group Name"

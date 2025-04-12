@@ -13,6 +13,11 @@ output "ecr_repository_names" {
   value       = [for repo in module.ecr_registry : repo.ecr_repository_name]
 }
 
+output "ecr_repository_urls" {
+  description = "The ECR repositories"
+  value       = [for repo in module.ecr_registry : repo.ecr_repository_url]
+}
+
 output "mlflow_ecr_repository_arn" {
   description = "The MLflow ECR repository"
   value       = module.ecr_registry["mlflow"].ecr_repository_arn
@@ -26,4 +31,9 @@ output "mlflow_ecr_repository_id" {
 output "mlflow_ecr_repository_name" {
   description = "The MLflow ECR repository"
   value       = module.ecr_registry["mlflow"].ecr_repository_name
+}
+
+output "mlflow_ecr_repository_url" {
+  description = "The MLflow ECR repository"
+  value       = module.ecr_registry["mlflow"].ecr_repository_url
 }
