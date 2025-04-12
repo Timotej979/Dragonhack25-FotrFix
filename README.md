@@ -64,13 +64,6 @@ Built with **multimodal AI** (vision + text + step-by-step planning), [FotrFix] 
 You just want it done.  
 [FotrFix] makes that happen.**
 
-## 🎤 Live Demo Preview
-
-> "Watch this."  
-> (Takes photo of leaking toy sink)  
-> → "Leak detected. Likely cause: loose washer. Step 1: Turn off water..."  
-> Audience: 👀 😲 🤯
-
 ## 🧠 Tech Stack
 
 - **Vision model:** Object and damage detection
