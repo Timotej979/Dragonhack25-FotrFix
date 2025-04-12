@@ -19,6 +19,7 @@ import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import { UseChatHelpers } from '@ai-sdk/react';
+import Image from 'next/image';
 
 const PurePreviewMessage = ({
   chatId,
@@ -49,23 +50,34 @@ const PurePreviewMessage = ({
         data-role={message.role}
       >
         <div
-          className={cn(
-            'flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl',
-            {
-              'w-full': mode === 'edit',
-              'group-data-[role=user]/message:w-fit': mode !== 'edit',
-            },
-          )}
+          className={cn('flex items-start gap-3 mb-4', {
+            'flex-row-reverse': message.role === 'user',
+          })}
         >
-          {message.role === 'assistant' && (
-            <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
-              <div className="translate-y-px">
-                <SparklesIcon size={14} />
-              </div>
-            </div>
-          )}
+          <div className="flex-shrink-0">
+            <Image
+              src={
+                message.role === 'user'
+                  ? `https://avatar.vercel.sh/user-avatar`
+                  : `/images/FotrFix-1.gif`
+              }
+              alt={`${message.role} avatar`}
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+          </div>
 
-          <div className="flex flex-col gap-4 w-full">
+          <div
+            className={cn(
+              'flex flex-col gap-4 w-full max-w-2xl',
+              {
+                'items-end text-right': message.role === 'user',
+                'items-start text-left': message.role !== 'user',
+              }
+            )}
+          >
+
             {message.experimental_attachments && (
               <div
                 data-testid={`message-attachments`}
@@ -118,9 +130,9 @@ const PurePreviewMessage = ({
 
                       <div
                         data-testid="message-content"
-                        className={cn('flex flex-col gap-4', {
-                          'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
-                            message.role === 'user',
+                        className={cn('flex flex-col gap-4 px-3 py-2 rounded-xl', {
+                          'bg-primary text-primary-foreground': message.role === 'user',
+                          'bg-muted': message.role === 'assistant',
                         })}
                       >
                         <Markdown>{part.text}</Markdown>
@@ -133,7 +145,6 @@ const PurePreviewMessage = ({
                   return (
                     <div key={key} className="flex flex-row gap-2 items-start">
                       <div className="size-8" />
-
                       <MessageEditor
                         key={message.id}
                         message={message}
@@ -248,25 +259,28 @@ export const ThinkingMessage = () => {
   return (
     <motion.div
       data-testid="message-assistant-loading"
-      className="w-full mx-auto max-w-3xl px-4 group/message "
+      className="w-full mx-auto max-w-3xl px-4 group/message"
       initial={{ y: 5, opacity: 0 }}
       animate={{ y: 0, opacity: 1, transition: { delay: 1 } }}
       data-role={role}
     >
-      <div
-        className={cx(
-          'flex gap-4 group-data-[role=user]/message:px-3 w-full group-data-[role=user]/message:w-fit group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl group-data-[role=user]/message:py-2 rounded-xl',
-          {
-            'group-data-[role=user]/message:bg-muted': true,
-          },
-        )}
-      >
-        <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
-          <SparklesIcon size={14} />
+      <div className="flex items-start gap-3 mb-4">
+        <div className="flex-shrink-0">
+          <Image
+            src="https://avatar.vercel.sh/assistant-avatar"
+            alt="assistant avatar"
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
         </div>
 
-        <div className="flex flex-col gap-2 w-full">
-          <div className="flex flex-col gap-4 text-muted-foreground">
+        <div className="flex gap-4 bg-muted px-3 py-2 rounded-xl">
+          <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
+            <SparklesIcon size={14} />
+          </div>
+
+          <div className="flex flex-col gap-2 text-muted-foreground">
             Hmm...
           </div>
         </div>

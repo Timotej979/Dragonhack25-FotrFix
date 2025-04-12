@@ -4,7 +4,11 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import greetings from '@/components/wordphrases/greetings.json';
 
-export const Greeting = () => {
+interface GreetingProps {
+  minimized?: boolean;
+}
+
+export const Greeting = ({ minimized = false }: GreetingProps) => {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -14,36 +18,53 @@ export const Greeting = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Define animation variants for the GIF image.
+  // You can adjust the "y" and "scale" values to match the desired movement and shrinkage.
+  const gifVariants = {
+    normal: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.5 },
+    },
+    minimized: {
+      opacity: 1,
+      y: -150, // Moves upward. Adjust this value as needed.
+      scale: 0.3, // Shrinks the GIF size. Adjust to match your AI profile pic size.
+      transition: { duration: 0.5 },
+    },
+  };
+
   return (
-    <div
-      key="overview"
-      className="w-full flex flex-col items-center justify-end gap-2 pb-4"
-    >
+    <div className="w-full flex flex-col items-center justify-end gap-2 pb-4">
+      {/* Render greeting bubble only when NOT minimized */}
+      {!minimized && (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.3 }}
+          className="relative bg-white text-black text-lg px-4 py-2 rounded-xl shadow-md border border-zinc-300 mb-[-60px] max-w-[80%] text-center"
+        >
+          {greetings[index]}
+          <div className="absolute left-[60%] -bottom-2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
+        </motion.div>
+      )}
 
-      {/* Speech bubble */}
-      <motion.div
-        key={index}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
-        transition={{ duration: 0.3 }}
-        className="relative bg-white text-black text-lg px-4 py-2 rounded-xl shadow-md border border-zinc-300 mb-[-60px] max-w-[80%] text-center"
-      >
-        {greetings[index]}
-        <div className="absolute left-[60%] -bottom-2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
-      </motion.div>
-
-
-      {/* GIF */}
+      {/* Animate the GIF image based on the minimized state */}
       <motion.img
         src="/images/FotrFix-1.gif"
         alt="Greeting animation"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
-        transition={{ delay: 0.5 }}
-        className="w-48 h-auto rounded-xl shadow-lg"
-
+        variants={gifVariants}
+        initial="normal"
+        animate={minimized ? 'minimized' : 'normal'}
+        transition={{ delay: minimized ? 0 : 0.5 }}
+        // You may adjust the className based on minimized state.
+        // For example, when minimized, you may want a smaller max-width.
+        className={`w-auto h-auto rounded-xl shadow-lg ${
+          !minimized ? 'max-w-[50%] sm:max-w-[60%] md:max-w-[60%] lg:max-w-[15%]' : 'max-w-[50px]'
+        }`}
       />
     </div>
   );

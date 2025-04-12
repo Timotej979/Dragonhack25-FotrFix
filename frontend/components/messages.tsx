@@ -37,8 +37,8 @@ function PureMessages({
         messages.length === 0 ? 'justify-end flex-1' : 'flex-1'
       }`}
     >
-
-      {messages.length === 0 && <Greeting />}
+      {/* Pass "minimized" prop to Greeting when at least one message exists */}
+      <Greeting minimized={messages.length > 0} />
 
       {messages.map((message, index) => (
         <PreviewMessage
