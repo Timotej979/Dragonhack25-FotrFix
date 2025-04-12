@@ -74,6 +74,7 @@ export function Chat({
           isReadonly={isReadonly}
         />
 
+      <div className="flex-1 flex flex-col overflow-auto pb-28 pt-12">
         <Messages
           chatId={id}
           status={status}
@@ -84,7 +85,9 @@ export function Chat({
           isReadonly={isReadonly}
           isArtifactVisible={isArtifactVisible}
         />
+      </div>
 
+        <div className="fixed bottom-0 inset-x-0 bg-background border-t">
         <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
           {!isReadonly && (
             <MultimodalInput
@@ -103,6 +106,7 @@ export function Chat({
           )}
         </form>
       </div>
+    </div>
 
       <Artifact
         chatId={id}
