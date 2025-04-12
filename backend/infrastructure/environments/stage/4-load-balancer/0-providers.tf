@@ -3,7 +3,7 @@ provider "aws" {
   region  = "eu-central-1"
 }
 
-data remote_state "terraform_state" {
+data "terraform_remote_state" "vpc" {
   backend = "s3"
   config = {
     bucket         = "stage-dragonhack25-fotrfix-terraform-state"
