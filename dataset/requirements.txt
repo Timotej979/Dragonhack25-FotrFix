@@ -1,0 +1,7 @@
+dotenv
+pypdf
+google-genai
+langchain-community
+pdfplumber
+requests
+sentence-transformers
