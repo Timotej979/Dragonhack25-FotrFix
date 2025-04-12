@@ -33,9 +33,12 @@ function PureMessages({
   return (
     <div
       ref={messagesContainerRef}
-      className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4"
+      className={`flex flex-col min-w-0 gap-6 overflow-y-auto pt-4 ${
+        messages.length === 0 ? 'justify-end flex-1' : 'flex-1'
+      }`}
     >
-      {messages.length === 0 && <Greeting />}
+      {/* Pass "minimized" prop to Greeting when at least one message exists */}
+      <Greeting minimized={messages.length > 0} />
 
       {messages.map((message, index) => (
         <PreviewMessage
