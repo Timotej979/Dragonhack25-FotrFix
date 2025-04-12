@@ -15,9 +15,10 @@ jobs:
     - name: Render terraform docs for environment-stages
       uses: terraform-docs/gh-actions@v1.4.1
       with:
-        working-dir: ./backend/infrastructure/
+        working-dir: ./backend/infrastructure/environments/
         recursive: true
-        recursive-path: environments
+        recursive-path: stage
+        output-method: replace
         git-push: true
 
     - name: Render terraform docs for modules
@@ -26,4 +27,5 @@ jobs:
         working-dir: ./backend/infrastructure/
         recursive: true
         recursive-path: modules
+        output-method: replace
         git-push: true
