@@ -1,5 +1,5 @@
 resource "aws_lb" "mlflow" {
-  name               = "${var.environment}-${var.project}-mlf-lb"
+  name               = "${var.environment}-${var.project}-lb"
   
   # Configuration
   load_balancer_type = "application"
@@ -22,7 +22,7 @@ resource "aws_lb" "mlflow" {
 }
 
 resource "aws_lb_target_group" "mlflow" {
-  name            = "${var.environment}-${var.project}-mlf-tg"
+  name            = "${var.environment}-${var.project}-tg"
 
   # Configuration
   target_type     = "ip"
