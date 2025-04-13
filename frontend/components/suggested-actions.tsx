@@ -34,14 +34,14 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
 
   const suggestedActions = [
     {
-      title: 'What are the advantages',
-      label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
+      title: 'How to fix',
+      label: 'a leaking toilet?',
+      action: 'How to fix a leaking toilet?',
     },
     {
-      title: 'Write code to',
-      label: `demonstrate djikstra's algorithm`,
-      action: `Write code to demonstrate djikstra's algorithm`,
+      title: 'How to repair',
+      label: `or patch drywall?`,
+      action: `How to repair or patch drywall?`,
     },
   ];
 

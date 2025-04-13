@@ -28,6 +28,43 @@ import { myProvider } from '@/lib/ai/providers';
 
 export const maxDuration = 60;
 
+export async function drawCircleOnImage({
+  imageUrl,
+  center,
+}: {
+  imageUrl: string;
+  center: { x: number; y: number };
+}): Promise<string> {
+  const image = new Image();
+  image.crossOrigin = 'anonymous'; // Important if the image is from another domain
+  image.src = imageUrl;
+
+  await new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = reject;
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas context not available');
+
+  ctx.drawImage(image, 0, 0);
+  
+  // Draw red circle
+  const radius = 20;
+  ctx.beginPath();
+  ctx.arc(center.x, center.y, radius, 0, 2 * Math.PI);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'orange';
+  ctx.stroke();
+
+  // Return as data URL (you can upload this somewhere if needed)
+  return canvas.toDataURL('image/png');
+}
+
 export async function POST(request: Request) {
   try {
     const {
@@ -148,7 +185,57 @@ export async function POST(request: Request) {
           },
         });
 
-        result.consumeStream();
+        // Initialize detectedCoords to null
+        let detectedCoords: { x: number; y: number } | null = null;
+
+        result.consumeStream({
+          onData: (chunk) => {
+            const modifiedChunk = {
+              ...chunk,
+              content: chunk.content.replace(
+                /<bounding_box>center:\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)<\/bounding_box>/i,
+                (_match, x, y) => {
+                  detectedCoords = {
+                    x: parseFloat(x),
+                    y: parseFloat(y),
+                  };
+                  return `(See the image at [${x}, ${y}])`;
+                },
+              ),
+            };
+      
+            dataStream.write(modifiedChunk);
+          },
+          onDone: async () => {
+            if (detectedCoords) {
+              const userImageAttachment = userMessage.experimental_attachments?.[0]; // assume 1 image
+              if (userImageAttachment?.url) {
+                const modifiedImageUrl = await drawCircleOnImage({
+                  imageUrl: userImageAttachment.url,
+                  center: detectedCoords,
+                });
+        
+                dataStream.write({
+                  content: '',
+                  role: 'assistant',
+                  attachments: [
+                    {
+                      type: 'image',
+                      url: modifiedImageUrl,
+                      name: 'highlighted-image.png',
+                    },
+                  ],
+                });
+              }
+            }
+            
+            dataStream.close(),
+          },
+          onError: (err) => {
+            console.error('Error in streaming:', err);
+            dataStream.close();
+          }
+        });
 
         result.mergeIntoDataStream(dataStream, {
           sendReasoning: true,
