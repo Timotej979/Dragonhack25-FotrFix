@@ -43,7 +43,7 @@ function parseMyContent(content: string): {
     beforeWork: '',
     steps: [] as Array<{ number: number; content: string }>,
     totalSteps: 0,
-    boundingBox: undefined as { centerX: number; centerY: number } | undefined
+    boundingBox: undefined
   };
   
   // Extract introduction
