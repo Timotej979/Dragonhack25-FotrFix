@@ -42,7 +42,7 @@ function parseMyContent(content: string): {
     introduction: '',
     beforeWork: '',
     steps: [] as Array<{ number: number; content: string }>,
-    totalSteps: 0
+    totalSteps: 0,
     boundingBox: undefined as { centerX: number; centerY: number } | undefined
   };
   
