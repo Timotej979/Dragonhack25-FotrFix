@@ -39,7 +39,7 @@ function PureMessages({
       id="messages-container"
     >
       {messages.length === 0 && (
-        <div className="flex items-center justify-center w-full py-8">
+        <div className="flex items-center justify-center w-full py-8 h-full absolute bottom-10">
           <Greeting />
         </div>
       )}

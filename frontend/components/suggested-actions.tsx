@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { UseChatHelpers } from '@ai-sdk/react';
 
 interface SuggestedActionsProps {
@@ -11,6 +11,27 @@ interface SuggestedActionsProps {
 }
 
 function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
+  const [isKeyboardActive, setIsKeyboardActive] = useState(false);
+
+  useEffect(() => {
+    const handleFocus = () => setIsKeyboardActive(true);
+    const handleBlur = () => setIsKeyboardActive(false);
+
+    const inputs = document.querySelectorAll('input, textarea');
+    inputs.forEach((input) => {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+    });
+
+    // Cleanup event listeners
+    return () => {
+      inputs.forEach((input) => {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
+      });
+    };
+  }, []);
+
   const suggestedActions = [
     {
       title: 'What are the advantages',
@@ -23,6 +44,11 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
       action: `Write code to demonstrate djikstra's algorithm`,
     },
   ];
+
+  // Hide suggested actions when the keyboard is active
+  if (isKeyboardActive) {
+    return null;
+  }
 
   return (
     <div

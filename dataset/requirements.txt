@@ -1,7 +1,5 @@
-dotenv
-pypdf
-google-genai
-langchain-community
-pdfplumber
-requests
-sentence-transformers
+PyPDF2
+voyageai
+elasticsearch
+tiktoken
+python-dotenv
