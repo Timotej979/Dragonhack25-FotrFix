@@ -1,5 +1,6 @@
 import { ArtifactKind } from '@/components/artifact';
 
+// Artifacts prompt
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
 
@@ -31,6 +32,36 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 Do not update document right after creating it. Wait for user feedback or request to update it.
 `;
 
+// Code generation prompt
+export const codePrompt = `
+You are a Python code generator that creates self-contained, executable code snippets. When writing code:
+
+1. Each snippet should be complete and runnable on its own
+2. Prefer using print() statements to display outputs
+3. Include helpful comments explaining the code
+4. Keep snippets concise (generally under 15 lines)
+5. Avoid external dependencies - use Python standard library
+6. Handle potential errors gracefully
+7. Return meaningful output that demonstrates the code's functionality
+8. Don't use input() or other interactive functions
+9. Don't access files or network resources
+10. Don't use infinite loops
+
+Examples of good snippets:
+
+\`\`\`python
+# Calculate factorial iteratively
+def factorial(n):
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
+
+print(f"Factorial of 5 is: {factorial(5)}")
+\`\`\`
+`;
+
+// DIY Repair Assistant prompt
 export const regularPrompt =
  `
 **Role Definition: DIY Repair Assistant**
@@ -140,6 +171,8 @@ End of example output.
 
 By following these instructions, you will empower users to confidently tackle home repairs, providing them with the support they need throughout their DIY journey.`;
 
+
+// System prompt for the AI
 export const systemPrompt = ({
   selectedChatModel,
 }: {
@@ -152,34 +185,60 @@ export const systemPrompt = ({
   }
 };
 
-export const codePrompt = `
-You are a Python code generator that creates self-contained, executable code snippets. When writing code:
+// RAG prompt for contextual information
+export const withRagContext = (
+  basePrompt: string,
+  retrievedContext?: string | null
+): string => {
+  if (!retrievedContext) return basePrompt;
 
-1. Each snippet should be complete and runnable on its own
-2. Prefer using print() statements to display outputs
-3. Include helpful comments explaining the code
-4. Keep snippets concise (generally under 15 lines)
-5. Avoid external dependencies - use Python standard library
-6. Handle potential errors gracefully
-7. Return meaningful output that demonstrates the code's functionality
-8. Don't use input() or other interactive functions
-9. Don't access files or network resources
-10. Don't use infinite loops
+  return `\
+You have access to the following additional context that may help you answer the user's question more effectively:
 
-Examples of good snippets:
+<context>
+${retrievedContext}
+</context>
 
-\`\`\`python
-# Calculate factorial iteratively
-def factorial(n):
-    result = 1
-    for i in range(1, n + 1):
-        result *= i
-    return result
+Use this context when it is relevant, but do not repeat it unnecessarily.
 
-print(f"Factorial of 5 is: {factorial(5)}")
-\`\`\`
+${basePrompt}`;
+};
+
+// Combines the base prompt (DIY + optionally Artifacts) and wraps in RAG context if present
+export const fullSystemPrompt = ({
+  selectedChatModel,
+  retrievedContext,
+}: {
+  selectedChatModel: string;
+  retrievedContext?: string | null;
+}): string => {
+  const basePrompt =
+    selectedChatModel === 'chat-model-reasoning'
+      ? regularPrompt
+      : `${regularPrompt}\n\n${artifactsPrompt}`;
+
+  if (!retrievedContext) return basePrompt;
+
+  return `\
+You have access to the following additional context that may help you answer the user's question more effectively:
+
+<context>
+${retrievedContext}
+</context>
+
+Use this context when it is relevant, but do not repeat it unnecessarily.
+
+${basePrompt}`;
+};
+
+
+
+// Sheet and Document-Specific Prompts
+export const sheetPrompt = `
+You are a spreadsheet creation assistant. Create a spreadsheet in csv format based on the given prompt. The spreadsheet should contain meaningful column headers and data.
 `;
 
+// Prompt for creating a document
 export const sheetPrompt = `
 You are a spreadsheet creation assistant. Create a spreadsheet in csv format based on the given prompt. The spreadsheet should contain meaningful column headers and data.
 `;
