@@ -72,7 +72,11 @@ const PurePreviewMessage = ({
             setPaginationData(parsedContent.content);
             console.log("Pagination data found:", parsedContent.content);
           } else {
-            console.log("Message doesn't contain pagination data");
+            
+            console.log("Using single:", parsedContent.content);
+            // If not, treat it as a single-layer message
+
+            
           }
         } catch (error) {
           console.log("Not a JSON message or pagination data:", error);
@@ -96,6 +100,18 @@ const PurePreviewMessage = ({
     if (paginationData) {
       if (currentStep === 0) {
         // On first step, show introduction and beforeWork
+        if (!paginationData.introduction && !paginationData.beforeWork) {
+          console.log(paginationData.steps);
+          return paginationData.steps.map((step, index) => {
+            const stepIndex = index + 1; // Adjust for 0-indexing
+            return (
+              <div key={`step-${stepIndex}`}>
+                <h3 className="text-lg font-semibold mb-2">Step {stepIndex}</h3>
+                <Markdown>{JSON.parse(step.content)}</Markdown>
+              </div>
+            );
+          });
+        }
         return (
           <div className="flex flex-col gap-4">
             {paginationData.introduction && (

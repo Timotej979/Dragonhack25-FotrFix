@@ -133,6 +133,7 @@ export async function POST(request: Request) {
     return createDataStreamResponse({
       execute: async (dataStream: DataStreamWriter) => {
         let assistantId: string | undefined = undefined;
+        const isFirstPrompt = messages.length === 1;
 
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
@@ -161,8 +162,7 @@ export async function POST(request: Request) {
           onFinish: async ({ response, text }) => {
             let finalParsedContent = '';
             try {
-              var { introduction, beforeWork, steps, totalSteps } = parseMyContent(text);
-
+              
               if (session.user?.id) {
                 let potentialId = getTrailingMessageId({
                   messages: response.messages.filter(
@@ -199,15 +199,36 @@ export async function POST(request: Request) {
               }
 
               // Create a structured payload with all parsed content
-              const parsedData = {
-                content: {
-                  type: 'pagination',
-                  introduction,
-                  beforeWork,
-                  steps,
-                  totalSteps
+              let parsedData={};
+              if (isFirstPrompt) {
+                // Parse the first prompt into tasks (steps)
+                const { introduction, beforeWork, steps, totalSteps } = parseMyContent(text);
+
+                parsedData = {
+                  content: {
+                    type: 'pagination',
+                    introduction,
+                    beforeWork,
+                    steps,
+                    totalSteps,
+                  },
+                };
+              } else {
+                // Treat follow-up prompts as a single layer (question/answer)
+                const { introduction, beforeWork, steps, totalSteps } = parseMyContent(text);
+                for (let i = 0; i < totalSteps; i++) {
+                  finalParsedContent += steps[i].content + '\n';
                 }
-              };
+                parsedData = {
+                  content: {
+                    type: 'single-layer',
+                    // join up all the steps in one single layer
+                    finalParsedContent,
+                  },
+                };
+
+                console.log("Parsed content:", parsedData);
+              }
 
               // Send the structured data instead of just introduction + beforeWork
               dataStream.write(`0:${JSON.stringify(JSON.stringify(parsedData))}\n`);
