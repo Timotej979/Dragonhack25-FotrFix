@@ -6,7 +6,7 @@ import {
   DataStreamWriter,
 } from 'ai';
 import { auth } from '@/app/(auth)/auth';
-import { systemPrompt } from '@/lib/ai/prompts';
+import { fullSystemPrompt } from '@/lib/ai/prompts';
 import {
   deleteChatById,
   getChatById,
@@ -34,6 +34,7 @@ function parseMyContent(content: string): {
   beforeWork: string;
   steps: Array<{ number: number; content: string }>;
   totalSteps: number;
+  boundingBox?: { centerX: number; centerY: number };
 } {
   console.log("Parsing content (length):", content.length);
   
@@ -41,7 +42,8 @@ function parseMyContent(content: string): {
     introduction: '',
     beforeWork: '',
     steps: [] as Array<{ number: number; content: string }>,
-    totalSteps: 0
+    totalSteps: 0,
+    boundingBox: undefined
   };
   
   // Extract introduction
@@ -76,6 +78,15 @@ function parseMyContent(content: string): {
   // Calculate total steps
   result.totalSteps = result.steps.length;
   
+  // Extrat image coordinates if present
+  const boundingBoxMatch = content.match(/<bounding_box>center:\s*(\d+),\s*(\d+)<\/bounding_box>/);
+  if (boundingBoxMatch) {
+    result.boundingBox = {
+      centerX: parseInt(boundingBoxMatch[1]),
+      centerY: parseInt(boundingBoxMatch[2])
+    };
+  }
+
   return result;
 }
 
@@ -137,7 +148,7 @@ export async function POST(request: Request) {
 
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel }),
+          system: fullSystemPrompt({ selectedChatModel }),
           messages,
           maxSteps: 5,
           experimental_activeTools:
