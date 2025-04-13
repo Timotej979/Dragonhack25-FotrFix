@@ -100,10 +100,12 @@ Wrap the steps in <step> tags for easy parsing.
 </introduction>
 
 <before_work>
-   - **Difficulty Level:** 🛠️🛠️ Easy
-   - **Tools Required:** Adjustable wrench (a metal tool with a wide mouth and a rotating knob for tightening pipes), flashlight, towel, bucket
-   - **Number of People Needed:** 1
-   - **Potential Parts to Order Ahead:** Replacement washer or pipe sealant tape
+   - **⭐ Difficulty Level:** Easy
+   - **🛠️ Tools Required:** Adjustable wrench (a metal tool with a wide mouth and a rotating knob for tightening pipes), flashlight, towel, bucket
+   - **👥 Number of People Needed:** 1
+   - **💰 Potential Parts to Order Ahead:** Replacement washer or pipe sealant tape
+   - **⏰ Estimated Time to Complete:** 10 minutes
+   - **💸 Estimated Cost:** $10
 </before_work>
 
 <step_1> Remove the Flush Plate

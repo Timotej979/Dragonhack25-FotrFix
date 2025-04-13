@@ -115,16 +115,19 @@ const PurePreviewMessage = ({
       } else {
         // On other steps, show the corresponding step content
         const stepIndex = currentStep - 1; // Adjust for 0-indexing
-        const step = paginationData.steps[stepIndex];
-        
-        if (step) {
-          return (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Step {step.number}</h3>
-              <Markdown>{step.content}</Markdown>
-            </div>
-          );
+        if (stepIndex >= 0 && stepIndex < paginationData.steps.length) {
+          const step = paginationData.steps[stepIndex];
+          
+          if (step) {
+            return (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Step {step.number}</h3>
+                <Markdown>{step.content}</Markdown>
+              </div>
+            );
+          }
         }
+        return <div>Step not found</div>;
       }
     }
     
@@ -211,12 +214,12 @@ const PurePreviewMessage = ({
             {/* Render pagination controls only for assistant messages with pagination data */}
             {!isReadonly && message.role === 'assistant' && paginationData && (
               <MessageActions
-                key={`action-${message.id}`}
+                key={`action-${message.id}-${currentStep}`}
                 chatId={chatId}
                 message={message}
                 vote={vote}
                 isLoading={isLoading}
-                stepIndex={currentStep} 
+                stepIndex={currentStep === 0 ? 0 : paginationData.steps[currentStep - 1]?.number || currentStep} 
                 totalSteps={totalSteps}
                 isFirstStep={isFirstStep}
                 isLastStep={isLastStep}

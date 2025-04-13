@@ -213,6 +213,34 @@ export function PureMessageActions({
             </TooltipTrigger>
             <TooltipContent>Previous</TooltipContent>
           </Tooltip>
+          
+          {/* Step counter */}
+          <div className="flex flex-col items-center px-2 min-w-[150px]">
+            {totalSteps > 1 && (
+              <>
+                <span className="text-xs text-muted-foreground bg-gray-100 py-1 px-3 rounded-full mb-1 text-center">
+                  {stepIndex === 0 
+                    ? 'Introduction' 
+                    : `Step ${stepIndex}`}
+                  <span className="mx-1">of</span>
+                  {totalSteps - 1}
+                  {stepIndex > 0 && <span className="ml-1">steps</span>}
+                </span>
+                
+                {/* Progress bar - fix calculation */}
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-yellow-400 h-1.5 rounded-full transition-all duration-300 ease-in-out" 
+                    style={{ 
+                      width: totalSteps <= 1 
+                        ? '100%' 
+                        : `${Math.max((stepIndex / (totalSteps - 1)) * 100, 5)}%` 
+                    }}
+                  ></div>
+                </div>
+              </>
+            )}
+          </div>
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -247,7 +275,9 @@ export const MessageActions = memo(
   (prevProps, nextProps) => {
     if (!equal(prevProps.vote, nextProps.vote)) return false;
     if (prevProps.isLoading !== nextProps.isLoading) return false;
-
+    if (prevProps.stepIndex !== nextProps.stepIndex) return false; // Re-render when step changes
+    if (prevProps.totalSteps !== nextProps.totalSteps) return false; // Re-render when total steps changes
+    
     return true;
   },
 );
