@@ -20,6 +20,10 @@ import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
 import { UseChatHelpers } from '@ai-sdk/react';
 import Image from 'next/image';
+import { is } from 'drizzle-orm';
+
+
+
 
 const PurePreviewMessage = ({
   chatId,
@@ -38,7 +42,19 @@ const PurePreviewMessage = ({
   reload: UseChatHelpers['reload'];
   isReadonly: boolean;
 }) => {
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
+  var [currentStep, setCurrentStep] = useState(0); // Track the current step
+
+  // Preprocess message parts to split by "Step"
+  const steps = message.parts
+    ?.filter((part) => part.type === 'text') // Only process text parts
+    .flatMap((part) => part.text.split(/(?=Step)/)) // Split by "Step" keyword
+    .map((step) => step.trim()) // Trim whitespace
+    .filter((step) => step.length > 0); // Remove empty steps
+
+  const totalSteps = steps.length;
+    // Calculate isFirstStep and isLastStep based on currentStep and totalSteps
+  var isFirstStep = currentStep === 0;
+  var isLastStep = currentStep === totalSteps - 1;
 
   return (
     <AnimatePresence>
@@ -55,19 +71,17 @@ const PurePreviewMessage = ({
           })}
         >
           <div className="flex-shrink-0">
-          <Image
-            src={
-              message.role === 'user'
-                ? `https://avatar.vercel.sh/user-avatar`
-                : `/images/FotrFix-1.png`
-            }
-            alt={`${message.role} avatar`}
-            width={message.role === 'user' ? 40 : 48}
-            height={message.role === 'user' ? 40 : 48}
-            className="rounded-full"
-          />
-
-
+            <Image
+              src={
+                message.role === 'user'
+                  ? `https://avatar.vercel.sh/user-avatar`
+                  : `/images/FotrFix-1.png`
+              }
+              alt={`${message.role} avatar`}
+              width={message.role === 'user' ? 40 : 48}
+              height={message.role === 'user' ? 40 : 48}
+              className="rounded-full"
+            />
           </div>
 
           <div
@@ -79,24 +93,28 @@ const PurePreviewMessage = ({
               }
             )}
           >
-
-            {message.experimental_attachments && (
-              <div
-                data-testid={`message-attachments`}
-                className="flex flex-row justify-end gap-2"
-              >
-                {message.experimental_attachments.map((attachment) => (
-                  <PreviewAttachment
-                    key={attachment.url}
-                    attachment={attachment}
-                  />
-                ))}
-              </div>
-            )}
-
+            {/* Render only the current step */}
             {message.parts?.map((part, index) => {
+              if (index !== currentStep) return null; // Skip other steps
+
               const { type } = part;
               const key = `message-${message.id}-part-${index}`;
+
+              if (type === 'text') {
+                return (
+                  <div key={key} className="flex flex-row gap-2 items-start">
+                    <div
+                      data-testid="message-content"
+                      className={cn('flex flex-col gap-4 px-3 py-2 rounded-xl', {
+                        'bg-primary text-primary-foreground': message.role === 'user',
+                        'bg-muted': message.role === 'assistant',
+                      })}
+                    >
+                      <Markdown>{part.text}</Markdown>
+                    </div>
+                  </div>
+                );
+              }
 
               if (type === 'reasoning') {
                 return (
@@ -108,133 +126,47 @@ const PurePreviewMessage = ({
                 );
               }
 
-              if (type === 'text') {
-                if (mode === 'view') {
-                  return (
-                    <div key={key} className="flex flex-row gap-2 items-start">
-                      {message.role === 'user' && !isReadonly && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              data-testid="message-edit-button"
-                              variant="ghost"
-                              className="px-2 h-fit rounded-full text-muted-foreground opacity-0 group-hover/message:opacity-100"
-                              onClick={() => {
-                                setMode('edit');
-                              }}
-                            >
-                              <PencilEditIcon />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Edit message</TooltipContent>
-                        </Tooltip>
-                      )}
-
-                      <div
-                        data-testid="message-content"
-                        className={cn('flex flex-col gap-4 px-3 py-2 rounded-xl', {
-                          'bg-primary text-primary-foreground': message.role === 'user',
-                          'bg-muted': message.role === 'assistant',
-                        })}
-                      >
-                        <Markdown>{part.text}</Markdown>
-                      </div>
-                    </div>
-                  );
-                }
-
-                if (mode === 'edit') {
-                  return (
-                    <div key={key} className="flex flex-row gap-2 items-start">
-                      <div className="size-8" />
-                      <MessageEditor
-                        key={message.id}
-                        message={message}
-                        setMode={setMode}
-                        setMessages={setMessages}
-                        reload={reload}
-                      />
-                    </div>
-                  );
-                }
-              }
-
-              if (type === 'tool-invocation') {
-                const { toolInvocation } = part;
-                const { toolName, toolCallId, state } = toolInvocation;
-
-                if (state === 'call') {
-                  const { args } = toolInvocation;
-
-                  return (
-                    <div
-                      key={toolCallId}
-                      className={cx({
-                        skeleton: ['getWeather'].includes(toolName),
-                      })}
-                    >
-                      {toolName === 'getWeather' ? (
-                        <Weather />
-                      ) : toolName === 'createDocument' ? (
-                        <DocumentPreview isReadonly={isReadonly} args={args} />
-                      ) : toolName === 'updateDocument' ? (
-                        <DocumentToolCall
-                          type="update"
-                          args={args}
-                          isReadonly={isReadonly}
-                        />
-                      ) : toolName === 'requestSuggestions' ? (
-                        <DocumentToolCall
-                          type="request-suggestions"
-                          args={args}
-                          isReadonly={isReadonly}
-                        />
-                      ) : null}
-                    </div>
-                  );
-                }
-
-                if (state === 'result') {
-                  const { result } = toolInvocation;
-
-                  return (
-                    <div key={toolCallId}>
-                      {toolName === 'getWeather' ? (
-                        <Weather weatherAtLocation={result} />
-                      ) : toolName === 'createDocument' ? (
-                        <DocumentPreview
-                          isReadonly={isReadonly}
-                          result={result}
-                        />
-                      ) : toolName === 'updateDocument' ? (
-                        <DocumentToolResult
-                          type="update"
-                          result={result}
-                          isReadonly={isReadonly}
-                        />
-                      ) : toolName === 'requestSuggestions' ? (
-                        <DocumentToolResult
-                          type="request-suggestions"
-                          result={result}
-                          isReadonly={isReadonly}
-                        />
-                      ) : (
-                        <pre>{JSON.stringify(result, null, 2)}</pre>
-                      )}
-                    </div>
-                  );
-                }
-              }
+              // Handle other part types (e.g., tool-invocation) here if needed
             })}
 
+
+            
             {!isReadonly && (
               <MessageActions
-                key={`action-${message.id}`}
-                chatId={chatId}
-                message={message}
-                vote={vote}
-                isLoading={isLoading}
-              />
+              key={`action-${message.id}`}
+              chatId={chatId}
+              message={message}
+              vote={vote}
+              isLoading={isLoading}
+              stepIndex={currentStep} // Pass the current step index
+              totalSteps={totalSteps} // Pass the total number of steps
+              isFirstStep={isFirstStep} // Pass isFirstStep as a prop
+              isLastStep={isLastStep} // Pass isLastStep as a prop
+              onPrevious={() => {
+                console.log("Previous clicked. Current step before:", currentStep);
+                setCurrentStep((prev) => {
+                  const newStep = Math.max(prev - 1, 0); // Ensure it doesn't go below 0
+                  if(newStep === 0) {
+                    isFirstStep = true;
+                  }
+                  console.log("Current step after:", newStep);
+                  return newStep;
+                });
+              }} // Handler for Previous
+              onNext={() => {
+                console.log("Next clicked. Current step before:", currentStep);
+                setCurrentStep((prev) => {
+                  const newStep = Math.min(prev + 1, totalSteps - 1); // Ensure it doesn't exceed totalSteps - 1
+                  if(newStep === totalSteps - 1) {
+                    isLastStep = true;
+                  }
+                  console.log("isLastStep", isLastStep);
+
+                  console.log("Current step after:", newStep);
+                  return newStep;
+                });
+              }} // Handler for Next
+            />
             )}
           </div>
         </div>

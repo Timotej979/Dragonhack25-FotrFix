@@ -75,6 +75,37 @@ export const VercelIcon = ({ size = 17 }) => {
   );
 };
 
+export const NextIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    width={size}
+    viewBox="0 0 16 16"
+    style={{ color: 'currentcolor' }}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M4.5 3.5L9 8L4.5 12.5L5.5 13.5L11 8L5.5 2.5L4.5 3.5Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+export const PreviousIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    width={size}
+    viewBox="0 0 16 16"
+    style={{ color: 'currentcolor' }}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M11.5 3.5L7 8L11.5 12.5L10.5 13.5L5 8L10.5 2.5L11.5 3.5Z"
+      fill="currentColor"
+    />
+  </svg>
+);
 export const GitIcon = () => {
   return (
     <svg
