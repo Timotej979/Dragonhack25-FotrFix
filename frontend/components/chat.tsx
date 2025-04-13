@@ -66,7 +66,7 @@ export function Chat({
 
   return (
     <>
-      <div className="flex flex-col min-w-0 h-dvh bg-background">
+      <div className="flex flex-col h-screen bg-background">
         <ChatHeader
           chatId={id}
           selectedModelId={selectedChatModel}
@@ -74,21 +74,20 @@ export function Chat({
           isReadonly={isReadonly}
         />
 
-      <div className="flex-1 flex flex-col overflow-auto pb-28 pt-12">
-        <Messages
-          chatId={id}
-          status={status}
-          votes={votes}
-          messages={messages}
-          setMessages={setMessages}
-          reload={reload}
-          isReadonly={isReadonly}
-          isArtifactVisible={isArtifactVisible}
-        />
-      </div>
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <Messages
+            chatId={id}
+            status={status}
+            votes={votes}
+            messages={messages}
+            setMessages={setMessages}
+            reload={reload}
+            isReadonly={isReadonly}
+            isArtifactVisible={isArtifactVisible}
+          />
+        </div>
 
-        <div className="fixed bottom-0 inset-x-0 bg-background border-t">
-        <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
+        <form className="px-4 py-2 bg-background border-t flex mx-auto gap-2 w-full md:max-w-3xl">
           {!isReadonly && (
             <MultimodalInput
               chatId={id}
@@ -106,7 +105,6 @@ export function Chat({
           )}
         </form>
       </div>
-    </div>
 
       <Artifact
         chatId={id}
