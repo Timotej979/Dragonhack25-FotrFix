@@ -50,6 +50,7 @@ const PurePreviewMessage = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0); // Track the current step
   const [paginationData, setPaginationData] = useState<PaginationContent | null>(null);
+  const [singleLayerContent, setSingleLayerContent] = useState<string | null>(null);
   
   // Parse message content to extract pagination data if available
   useEffect(() => {
@@ -61,22 +62,33 @@ const PurePreviewMessage = ({
           // Try to parse the message content as JSON
           const content = textParts[0].text;
           
-          // The content might be double-stringified JSON
-          const parsedData = JSON.parse(content);
-          const parsedContent = typeof parsedData === 'string' 
-            ? JSON.parse(parsedData) 
-            : parsedData;
-          
-          // Check if it matches our pagination format
-          if (parsedContent?.content?.type === 'pagination') {
-            setPaginationData(parsedContent.content);
-            console.log("Pagination data found:", parsedContent.content);
-          } else {
+          // See if it's valid JSON first
+          try {
+            // The content might be double-stringified JSON
+            const parsedData = JSON.parse(content);
+            const parsedContent = typeof parsedData === 'string' 
+              ? JSON.parse(parsedData) 
+              : parsedData;
             
-            console.log("Using single:", parsedContent.content);
-            // If not, treat it as a single-layer message
-
-            
+            // Check if it matches our pagination format
+            if (parsedContent?.content?.type === 'pagination') {
+              setPaginationData(parsedContent.content);
+              setSingleLayerContent(null);
+              console.log("Pagination data found:", parsedContent.content);
+            } else if (parsedContent?.content?.type === 'single-layer') {
+              // Handle single-layer type
+              setSingleLayerContent(parsedContent.content.finalParsedContent || content);
+              setPaginationData(null);
+              console.log("Single layer content:", parsedContent.content.finalParsedContent);
+            } else {
+              // Regular JSON but not our special format
+              setSingleLayerContent(content);
+              setPaginationData(null);
+            }
+          } catch (e) {
+            // Not JSON, treat as regular text
+            setSingleLayerContent(content);
+            setPaginationData(null);
           }
         } catch (error) {
           console.log("Not a JSON message or pagination data:", error);
@@ -145,9 +157,21 @@ const PurePreviewMessage = ({
         }
         return <div>Step not found</div>;
       }
+    } else if (singleLayerContent) {
+      // Handle single-layer content directly
+      return (
+        <div className="flex flex-row gap-2 items-start">
+          <div
+            data-testid="message-content"
+            className="flex flex-col gap-4 px-3 py-2 rounded-xl"
+          >
+            <Markdown>{singleLayerContent}</Markdown>
+          </div>
+        </div>
+      );
     }
     
-    // Fallback to regular message rendering if no pagination data
+    // Existing fallback for regular message parts
     return message.parts?.map((part, index) => {
       const { type } = part;
       const key = `message-${message.id}-part-${index}`;

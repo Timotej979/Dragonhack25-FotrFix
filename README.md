@@ -17,6 +17,9 @@ The reality:
 
 Home ownership and rentals are skyrocketing — but **DIY skills aren't**.
 
+![Demo1](/dataset/documents/Screenshot_20250413-161640.jpg)
+![Demo2](/dataset/documents/Screenshot_20250413-161644.jpg)
+
 ## 🚀 The Solution: [FotrFix]
 
 **Meet [FotrFix]: Your Pocket-Sized Repair Expert.**  
