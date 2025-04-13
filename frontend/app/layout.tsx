@@ -21,7 +21,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
   maximumScale: 1, // Disable auto-zoom on mobile Safari
+  height: 'device-height',
+  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: 'hsl(0 0% 100%)' },
     { media: '(prefers-color-scheme: dark)', color: 'hsl(240deg 10% 3.92%)' },
@@ -84,6 +88,52 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Chatbot" />
+        
+        {/* Keyboard visibility detection script */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // Set initial viewport height
+                let vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', vh + 'px');
+                
+                // Detect virtual keyboard
+                let initialHeight = window.innerHeight;
+                let isKeyboardVisible = false;
+                
+                window.addEventListener('resize', function() {
+                  // If height reduced significantly, keyboard is likely visible
+                  if (window.innerHeight < initialHeight * 0.75) {
+                    if (!isKeyboardVisible) {
+                      isKeyboardVisible = true;
+                      document.documentElement.classList.add('keyboard-visible');
+                      document.body.classList.add('keyboard-visible');
+                      
+                      // Set a timeout to allow scrolling after the keyboard has fully appeared
+                      setTimeout(() => {
+                        const activeElement = document.activeElement;
+                        if (activeElement) {
+                          activeElement.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                        }
+                      }, 300);
+                    }
+                  } else {
+                    if (isKeyboardVisible) {
+                      isKeyboardVisible = false;
+                      document.documentElement.classList.remove('keyboard-visible');
+                      document.body.classList.remove('keyboard-visible');
+                      
+                      // Update vh variable when keyboard closes
+                      vh = window.innerHeight * 0.01;
+                      document.documentElement.style.setProperty('--vh', vh + 'px');
+                    }
+                  }
+                });
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="antialiased">
         <ThemeProvider

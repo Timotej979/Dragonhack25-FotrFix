@@ -6,6 +6,7 @@
     --foreground-rgb: 0, 0, 0;
     --background-start-rgb: 214, 219, 220;
     --background-end-rgb: 255, 255, 255;
+    --keyboard-padding: env(safe-area-inset-bottom, 0);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,6 +21,53 @@
     .text-balance {
         text-wrap: balance;
     }
+    
+    .pb-safe {
+        padding-bottom: var(--keyboard-padding);
+    }
+    
+    /* Adjust layout when virtual keyboard is visible */
+    @media (max-height: 400px) {
+        .h-screen {
+            height: 100%;
+        }
+        
+        .min-h-svh {
+            min-height: 100%;
+        }
+    }
+}
+
+/* Mobile keyboard behavior */
+.keyboard-open {
+    height: 100% !important;
+    min-height: auto !important;
+    overflow-y: auto !important;
+}
+
+.keyboard-open .flex-1 {
+    flex-grow: 1 !important;
+    overflow-y: auto !important;
+    padding-bottom: 60px; /* Reduced padding */
+}
+
+/* Fix for suggestion actions */
+.keyboard-open .max-h-48 {
+    max-height: 140px !important;
+}
+
+/* Replace prevent-scroll with keyboard-visible */
+html.keyboard-visible,
+body.keyboard-visible {
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Add scroll padding when keyboard is visible */
+.keyboard-visible .sticky {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 50 !important;
 }
 
 @layer base {

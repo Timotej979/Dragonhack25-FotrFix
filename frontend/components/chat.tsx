@@ -30,6 +30,7 @@ export function Chat({
   isReadonly: boolean;
 }) {
   const { mutate } = useSWRConfig();
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const {
     messages,
@@ -64,9 +65,13 @@ export function Chat({
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
+  // Handle focus state
+  const handleFocus = () => setIsInputFocused(true);
+  const handleBlur = () => setIsInputFocused(false);
+
   return (
     <>
-      <div className="flex flex-col h-screen bg-background">
+      <div className={`flex flex-col h-[100dvh] bg-background ${isInputFocused ? 'keyboard-open' : ''}`}>
         <ChatHeader
           chatId={id}
           selectedModelId={selectedChatModel}
@@ -74,7 +79,7 @@ export function Chat({
           isReadonly={isReadonly}
         />
 
-        <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="flex-1 overflow-y-auto px-4 py-2">
           <Messages
             chatId={id}
             status={status}
@@ -87,7 +92,18 @@ export function Chat({
           />
         </div>
 
-        <form className="px-4 py-2 bg-background border-t flex mx-auto gap-2 w-full md:max-w-3xl">
+        <form 
+          id="chat-input-form"
+          className="sticky bottom-0 px-4 py-3 bg-background border-t flex mx-auto gap-2 w-full md:max-w-3xl z-10"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(e);
+            // Force unfocus after submission
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
+          }}
+        >
           {!isReadonly && (
             <MultimodalInput
               chatId={id}
@@ -101,6 +117,8 @@ export function Chat({
               messages={messages}
               setMessages={setMessages}
               append={append}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
             />
           )}
         </form>

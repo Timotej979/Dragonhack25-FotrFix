@@ -189,7 +189,9 @@ function PureMultimodalInput({
       {messages.length === 0 &&
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
-          <SuggestedActions append={append} chatId={chatId} />
+          <div className="h-auto max-h-48 overflow-y-auto">
+            <SuggestedActions append={append} chatId={chatId} />
+          </div>
         )}
 
       <input
