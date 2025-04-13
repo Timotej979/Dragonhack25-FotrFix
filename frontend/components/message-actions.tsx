@@ -204,7 +204,7 @@ export function PureMessageActions({
                 onClick={() => {
                   console.log("Previous button clicked");
                   onPrevious(); // Call the onPrevious handler passed as a prop
-                  toast.success('Previous step');
+                  //toast.success('Previous step');
                 }}
               >
                 <PreviousIcon />
@@ -255,7 +255,7 @@ export function PureMessageActions({
                 onClick={() => {
                   console.log("Next button clicked");
                   onNext(); // Call the onNext handler passed as a prop
-                  toast.success('Next step');
+                  //toast.success('Next step');
                 }}
               >
                 <span className="mr-1">Next</span>
