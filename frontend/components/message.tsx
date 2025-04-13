@@ -3,7 +3,7 @@
 import type { UIMessage } from 'ai';
 import cx from 'classnames';
 import { AnimatePresence, motion } from 'framer-motion';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import type { Vote } from '@/lib/db/schema';
 import { DocumentToolCall, DocumentToolResult } from './document';
 import { PencilEditIcon, SparklesIcon } from './icons';
@@ -22,8 +22,14 @@ import { UseChatHelpers } from '@ai-sdk/react';
 import Image from 'next/image';
 import { is } from 'drizzle-orm';
 
-
-
+// Define pagination content interface
+interface PaginationContent {
+  type: 'pagination';
+  introduction: string;
+  beforeWork: string;
+  steps: Array<{ number: number; content: string }>;
+  totalSteps: number;
+}
 
 const PurePreviewMessage = ({
   chatId,
@@ -42,19 +48,117 @@ const PurePreviewMessage = ({
   reload: UseChatHelpers['reload'];
   isReadonly: boolean;
 }) => {
-  var [currentStep, setCurrentStep] = useState(0); // Track the current step
+  const [currentStep, setCurrentStep] = useState(0); // Track the current step
+  const [paginationData, setPaginationData] = useState<PaginationContent | null>(null);
+  
+  // Parse message content to extract pagination data if available
+  useEffect(() => {
+    if (message.role === 'assistant' && message.parts) {
+      const textParts = message.parts.filter(part => part.type === 'text');
+      
+      if (textParts.length > 0) {
+        try {
+          // Try to parse the message content as JSON
+          const content = textParts[0].text;
+          
+          // The content might be double-stringified JSON
+          const parsedData = JSON.parse(content);
+          const parsedContent = typeof parsedData === 'string' 
+            ? JSON.parse(parsedData) 
+            : parsedData;
+          
+          // Check if it matches our pagination format
+          if (parsedContent?.content?.type === 'pagination') {
+            setPaginationData(parsedContent.content);
+            console.log("Pagination data found:", parsedContent.content);
+          } else {
+            console.log("Message doesn't contain pagination data");
+          }
+        } catch (error) {
+          console.log("Not a JSON message or pagination data:", error);
+        }
+      }
+    }
+  }, [message]);
 
-  // Preprocess message parts to split by "Step"
-  const steps = message.parts
-    ?.filter((part) => part.type === 'text') // Only process text parts
-    .flatMap((part) => part.text.split(/(?=Step)/)) // Split by "Step" keyword
-    .map((step) => step.trim()) // Trim whitespace
-    .filter((step) => step.length > 0); // Remove empty steps
+  // Get total steps for pagination controls
+  const totalSteps = paginationData 
+    ? paginationData.steps.length + 1 // +1 for intro/beforeWork
+    : 1;
+  
+  // Calculate isFirstStep and isLastStep
+  const isFirstStep = currentStep === 0;
+  const isLastStep = currentStep === totalSteps - 1;
 
-  const totalSteps = steps.length;
-    // Calculate isFirstStep and isLastStep based on currentStep and totalSteps
-  var isFirstStep = currentStep === 0;
-  var isLastStep = currentStep === totalSteps - 1;
+  // Render the appropriate content based on currentStep
+  const renderContent = () => {
+    // If we have pagination data
+    if (paginationData) {
+      if (currentStep === 0) {
+        // On first step, show introduction and beforeWork
+        return (
+          <div className="flex flex-col gap-4">
+            {paginationData.introduction && (
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold mb-2">Introduction</h3>
+                <Markdown>{paginationData.introduction}</Markdown>
+              </div>
+            )}
+            {paginationData.beforeWork && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Before We Begin</h3>
+                <Markdown>{paginationData.beforeWork}</Markdown>
+              </div>
+            )}
+          </div>
+        );
+      } else {
+        // On other steps, show the corresponding step content
+        const stepIndex = currentStep - 1; // Adjust for 0-indexing
+        const step = paginationData.steps[stepIndex];
+        
+        if (step) {
+          return (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Step {step.number}</h3>
+              <Markdown>{step.content}</Markdown>
+            </div>
+          );
+        }
+      }
+    }
+    
+    // Fallback to regular message rendering if no pagination data
+    return message.parts?.map((part, index) => {
+      const { type } = part;
+      const key = `message-${message.id}-part-${index}`;
+
+      if (type === 'text') {
+        return (
+          <div key={key} className="flex flex-row gap-2 items-start">
+            <div
+              data-testid="message-content"
+              className="flex flex-col gap-4 px-3 py-2 rounded-xl"
+            >
+              <Markdown>{part.text}</Markdown>
+            </div>
+          </div>
+        );
+      }
+
+      if (type === 'reasoning') {
+        return (
+          <MessageReasoning
+            key={key}
+            isLoading={isLoading}
+            reasoning={part.reasoning}
+          />
+        );
+      }
+      
+      return null; // Ignore other part types
+    });
+  };
 
   return (
     <AnimatePresence>
@@ -93,80 +197,55 @@ const PurePreviewMessage = ({
               }
             )}
           >
-            {/* Render only the current step */}
-            {message.parts?.map((part, index) => {
-              if (index !== currentStep) return null; // Skip other steps
-
-              const { type } = part;
-              const key = `message-${message.id}-part-${index}`;
-
-              if (type === 'text') {
-                return (
-                  <div key={key} className="flex flex-row gap-2 items-start">
-                    <div
-                      data-testid="message-content"
-                      className={cn('flex flex-col gap-4 px-3 py-2 rounded-xl', {
-                        'bg-primary text-primary-foreground': message.role === 'user',
-                        'bg-muted': message.role === 'assistant',
-                      })}
-                    >
-                      <Markdown>{part.text}</Markdown>
-                    </div>
-                  </div>
-                );
-              }
-
-              if (type === 'reasoning') {
-                return (
-                  <MessageReasoning
-                    key={key}
-                    isLoading={isLoading}
-                    reasoning={part.reasoning}
-                  />
-                );
-              }
-
-              // Handle other part types (e.g., tool-invocation) here if needed
-            })}
-
-
+            {/* Render content based on pagination state */}
+            <div
+              data-testid="message-content"
+              className={cn('flex flex-col gap-4 px-3 py-2 rounded-xl', {
+                'bg-primary text-primary-foreground': message.role === 'user',
+                'bg-muted': message.role === 'assistant',
+              })}
+            >
+              {renderContent()}
+            </div>
             
-            {!isReadonly && (
+            {/* Render pagination controls only for assistant messages with pagination data */}
+            {!isReadonly && message.role === 'assistant' && paginationData && (
               <MessageActions
-              key={`action-${message.id}`}
-              chatId={chatId}
-              message={message}
-              vote={vote}
-              isLoading={isLoading}
-              stepIndex={currentStep} // Pass the current step index
-              totalSteps={totalSteps} // Pass the total number of steps
-              isFirstStep={isFirstStep} // Pass isFirstStep as a prop
-              isLastStep={isLastStep} // Pass isLastStep as a prop
-              onPrevious={() => {
-                console.log("Previous clicked. Current step before:", currentStep);
-                setCurrentStep((prev) => {
-                  const newStep = Math.max(prev - 1, 0); // Ensure it doesn't go below 0
-                  if(newStep === 0) {
-                    isFirstStep = true;
-                  }
-                  console.log("Current step after:", newStep);
-                  return newStep;
-                });
-              }} // Handler for Previous
-              onNext={() => {
-                console.log("Next clicked. Current step before:", currentStep);
-                setCurrentStep((prev) => {
-                  const newStep = Math.min(prev + 1, totalSteps - 1); // Ensure it doesn't exceed totalSteps - 1
-                  if(newStep === totalSteps - 1) {
-                    isLastStep = true;
-                  }
-                  console.log("isLastStep", isLastStep);
-
-                  console.log("Current step after:", newStep);
-                  return newStep;
-                });
-              }} // Handler for Next
-            />
+                key={`action-${message.id}`}
+                chatId={chatId}
+                message={message}
+                vote={vote}
+                isLoading={isLoading}
+                stepIndex={currentStep} 
+                totalSteps={totalSteps}
+                isFirstStep={isFirstStep}
+                isLastStep={isLastStep}
+                onPrevious={() => {
+                  console.log("Previous clicked. Current step before:", currentStep);
+                  setCurrentStep((prev) => Math.max(prev - 1, 0));
+                }}
+                onNext={() => {
+                  console.log("Next clicked. Current step before:", currentStep);
+                  setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1));
+                }}
+              />
+            )}
+            
+            {/* Keep regular actions for non-pagination content */}
+            {!isReadonly && message.role === 'assistant' && !paginationData && (
+              <MessageActions
+                key={`action-${message.id}`}
+                chatId={chatId}
+                message={message}
+                vote={vote}
+                isLoading={isLoading}
+                stepIndex={0}
+                totalSteps={1}
+                isFirstStep={true}
+                isLastStep={true}
+                onPrevious={() => {}}
+                onNext={() => {}}
+              />
             )}
           </div>
         </div>

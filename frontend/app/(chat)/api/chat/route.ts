@@ -28,19 +28,55 @@ import { myProvider } from '@/lib/ai/providers';
 
 export const maxDuration = 60;
 
-// Placeholder function for your parsing logic
-function parseMyContent(content: string): string {
+// Parse content to extract introduction, before_work, and steps for pagination
+function parseMyContent(content: string): {
+  introduction: string;
+  beforeWork: string;
+  steps: Array<{ number: number; content: string }>;
+  totalSteps: number;
+} {
   console.log("Parsing content (length):", content.length);
-  // Replace this with your actual parsing logic.
-  // For example, if the AI is supposed to return JSON:
-  // try {
-  //   const parsed = JSON.parse(content);
-  //   return JSON.stringify(parsed, null, 2); // Return pretty-printed JSON
-  // } catch (e) {
-  //   console.error("Parsing failed:", e);
-  //   return `Error parsing content: ${content}`; // Indicate error
-  // }
-  return content; // Return original content if no parsing needed or failed
+  
+  const result = {
+    introduction: '',
+    beforeWork: '',
+    steps: [] as Array<{ number: number; content: string }>,
+    totalSteps: 0
+  };
+  
+  // Extract introduction
+  const introMatch = content.match(/<introduction>([\s\S]*?)<\/introduction>/);
+  if (introMatch && introMatch[1]) {
+    result.introduction = introMatch[1].trim();
+  }
+  
+  // Extract before_work
+  const beforeWorkMatch = content.match(/<before_work>([\s\S]*?)<\/before_work>/);
+  if (beforeWorkMatch && beforeWorkMatch[1]) {
+    result.beforeWork = beforeWorkMatch[1].trim();
+  }
+  
+  // Extract all steps
+  const stepRegex = /<step_(\d+)>([\s\S]*?)<\/step_\1>/g;
+  let match;
+  
+  while ((match = stepRegex.exec(content)) !== null) {
+    const stepNumber = parseInt(match[1], 10);
+    const stepContent = match[2].trim();
+    
+    result.steps.push({
+      number: stepNumber,
+      content: stepContent
+    });
+  }
+  
+  // Sort steps by number to ensure correct order
+  result.steps.sort((a, b) => a.number - b.number);
+  
+  // Calculate total steps
+  result.totalSteps = result.steps.length;
+  
+  return result;
 }
 
 export async function POST(request: Request) {
@@ -125,7 +161,7 @@ export async function POST(request: Request) {
           onFinish: async ({ response, text }) => {
             let finalParsedContent = '';
             try {
-              finalParsedContent = parseMyContent(text);
+              var { introduction, beforeWork, steps, totalSteps } = parseMyContent(text);
 
               if (session.user?.id) {
                 let potentialId = getTrailingMessageId({
@@ -162,7 +198,19 @@ export async function POST(request: Request) {
                 assistantId = generateUUID();
               }
 
-              dataStream.write(`0:${JSON.stringify(finalParsedContent)}\n`);
+              // Create a structured payload with all parsed content
+              const parsedData = {
+                content: {
+                  type: 'pagination',
+                  introduction,
+                  beforeWork,
+                  steps,
+                  totalSteps
+                }
+              };
+
+              // Send the structured data instead of just introduction + beforeWork
+              dataStream.write(`0:${JSON.stringify(JSON.stringify(parsedData))}\n`);
             } catch (error) {
               console.error('Error during onFinish processing or parsing:', error);
               const errorMessageContent = `Error processing response: ${error instanceof Error ? error.message : 'Unknown error'}`;

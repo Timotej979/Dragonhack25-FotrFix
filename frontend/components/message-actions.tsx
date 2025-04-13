@@ -47,11 +47,8 @@ export function PureMessageActions({
   if (isLoading) return null;
   if (message.role === 'user') return null;
 
-  var isFirstStep = stepIndex === 0;
-  console.log("is first step" + isFirstStep);
-  var isLastStep = stepIndex === totalSteps - 1;
-  console.log("is last step" + isLastStep);
-
+  // Let the props control these variables - do not overwrite them
+  console.log("Is first step:", isFirstStep, "Is last step:", isLastStep, "Current step:", stepIndex, "Total steps:", totalSteps);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -199,23 +196,19 @@ export function PureMessageActions({
               <Button
                 className={`py-1 px-2 h-fit ${
                   isFirstStep
-                    ? 'bg-yellow-400 text-yellow-800'
+                    ? 'bg-gray-200 text-gray-400'
                     : 'bg-yellow-100 text-yellow-500'
                 }`}
                 variant="outline"
-                disabled={!isLastStep}
-                
+                disabled={isFirstStep} // Disable when it's the first step
                 onClick={() => {
-                  isFirstStep = false; // Set isLastStep to false when Previous is clicked
-                  isLastStep = true; // Set isLastStep to false when Previous is clicked
-                  console.log("currentStep", stepIndex, "totalSteps", totalSteps);
+                  console.log("Previous button clicked");
                   onPrevious(); // Call the onPrevious handler passed as a prop
-                  toast.success('Previous Button Clicked!');
+                  toast.success('Previous step');
                 }}
               >
                 <PreviousIcon />
                 <span className="mr-1">Previous</span>
-                
               </Button>
             </TooltipTrigger>
             <TooltipContent>Previous</TooltipContent>
@@ -225,23 +218,16 @@ export function PureMessageActions({
             <TooltipTrigger asChild>
               <Button
                 className={`py-1 px-2 h-fit ${
-                  isFirstStep
-                    ? 'bg-yellow-400 text-yellow-800 '
+                  isLastStep
+                    ? 'bg-gray-200 text-gray-400'
                     : 'bg-yellow-100 text-yellow-500'
                 }`}
                 variant="outline"
-                disabled={!isFirstStep}
+                disabled={isLastStep} // Disable when it's the last step
                 onClick={() => {
-                  isFirstStep = false; // Set isFirstStep to false when Next is clicked
-                  if(stepIndex === totalSteps - 1) {
-                    isLastStep = true; // Set isLastStep to false when Next is clicked
-                  }
-                  else {
-                    isLastStep = false; // Set isLastStep to false when Next is clicked
-                  }
-                  console.log("currentStep", stepIndex, "totalSteps", totalSteps);  
+                  console.log("Next button clicked");
                   onNext(); // Call the onNext handler passed as a prop
-                  toast.success('Next Button Clicked!');
+                  toast.success('Next step');
                 }}
               >
                 <span className="mr-1">Next</span>
