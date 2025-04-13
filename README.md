@@ -13,16 +13,16 @@ The reality:
 - No time to dig through forums.
 - No idea what tools they need.
 - No confidence they're doing it right.
-- The YouTube tutorial is close but not close enough.
+- The YouTube tutorial is sometimes close but not close enough.
 
 Home ownership and rentals are skyrocketing — but **DIY skills aren't**.
 
 ## 🚀 The Solution: [FotrFix]
 
 **Meet [FotrFix]: Your Pocket-Sized Repair Expert.**  
-No manuals.  
+No looking for manuals.  
 No endless videos.  
-No calling your dad.
+No calling for help.
 
 Just snap a photo or video of the problem — and [FotrFix] **shows you exactly how to fix it**, step-by-step.
 
@@ -34,11 +34,12 @@ Built with **multimodal AI** (vision + text + step-by-step planning), [FotrFix] 
    Take a photo or quick video of the issue (a leak, a jammed door, a broken hinge — anything).
 
 2. **Diagnose It**  
-   [FotrFix] identifies the problem and recommends the fix instantly.
+   [FotrFix] identifies the problem and recommends the fix in steps instantly.
 
 3. **Fix It**  
-   Follow crystal-clear steps, visuals, and optional videos.  
-   Ask questions any time — it's like chatting with a real repair expert - our model does the thinking, you do the screwing.
+   Follow crystal-clear steps and visuals.  
+   Ask questions any time — it's like chatting with a real repair expert dad - our model does the thinking, **you do the screwing**. 
+   And screw with confidence, you will.
 
 ## 🛠️ What It Can Help You Fix
 
@@ -50,6 +51,7 @@ Built with **multimodal AI** (vision + text + step-by-step planning), [FotrFix] 
 ✅ Wall holes  
 ✅ Cabinet misalignment  
 ✅ And more (with every update!)
+❌ Your half-working RAG LLM
 
 ## 🤯 Why It's Actually Revolutionary
 
@@ -63,14 +65,6 @@ Built with **multimodal AI** (vision + text + step-by-step planning), [FotrFix] 
 **Nobody has time to become a DIY guru.  
 You just want it done.  
 [FotrFix] makes that happen.**
-
-## 🧠 Tech Stack
-
-- **Vision model:** Object and damage detection
-- **Language model:** Repair guide generation + chat Q&A
-- **Lightweight AR:** (Optional) Part highlighting
-- **Memory system:** Remembers steps completed
-- **Simple intuitive UX:** No learning curve
 
 ## 🏆 Why We Built This
 

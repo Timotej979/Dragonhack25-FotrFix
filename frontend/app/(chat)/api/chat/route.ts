@@ -2,8 +2,8 @@ import {
   UIMessage,
   appendResponseMessages,
   createDataStreamResponse,
-  smoothStream,
   streamText,
+  DataStreamWriter,
 } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { systemPrompt } from '@/lib/ai/prompts';
@@ -27,6 +27,21 @@ import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
 
 export const maxDuration = 60;
+
+// Placeholder function for your parsing logic
+function parseMyContent(content: string): string {
+  console.log("Parsing content (length):", content.length);
+  // Replace this with your actual parsing logic.
+  // For example, if the AI is supposed to return JSON:
+  // try {
+  //   const parsed = JSON.parse(content);
+  //   return JSON.stringify(parsed, null, 2); // Return pretty-printed JSON
+  // } catch (e) {
+  //   console.error("Parsing failed:", e);
+  //   return `Error parsing content: ${content}`; // Indicate error
+  // }
+  return content; // Return original content if no parsing needed or failed
+}
 
 export async function POST(request: Request) {
   try {
@@ -80,7 +95,9 @@ export async function POST(request: Request) {
     });
 
     return createDataStreamResponse({
-      execute: (dataStream) => {
+      execute: async (dataStream: DataStreamWriter) => {
+        let assistantId: string | undefined = undefined;
+
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel }),
@@ -95,7 +112,6 @@ export async function POST(request: Request) {
                   'updateDocument',
                   'requestSuggestions',
                 ],
-          experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
           tools: {
             getWeather,
@@ -106,17 +122,22 @@ export async function POST(request: Request) {
               dataStream,
             }),
           },
-          onFinish: async ({ response }) => {
-            if (session.user?.id) {
-              try {
-                const assistantId = getTrailingMessageId({
+          onFinish: async ({ response, text }) => {
+            let finalParsedContent = '';
+            try {
+              finalParsedContent = parseMyContent(text);
+
+              if (session.user?.id) {
+                let potentialId = getTrailingMessageId({
                   messages: response.messages.filter(
                     (message) => message.role === 'assistant',
                   ),
                 });
+                assistantId = potentialId ?? undefined;
 
                 if (!assistantId) {
-                  throw new Error('No assistant message found!');
+                  console.error('No assistant message ID found in response!');
+                  assistantId = generateUUID();
                 }
 
                 const [, assistantMessage] = appendResponseMessages({
@@ -137,9 +158,15 @@ export async function POST(request: Request) {
                     },
                   ],
                 });
-              } catch (_) {
-                console.error('Failed to save chat');
+              } else {
+                assistantId = generateUUID();
               }
+
+              dataStream.write(`0:${JSON.stringify(finalParsedContent)}\n`);
+            } catch (error) {
+              console.error('Error during onFinish processing or parsing:', error);
+              const errorMessageContent = `Error processing response: ${error instanceof Error ? error.message : 'Unknown error'}`;
+              dataStream.write(`0:${JSON.stringify(errorMessageContent)}\n`);
             }
           },
           experimental_telemetry: {
@@ -148,19 +175,22 @@ export async function POST(request: Request) {
           },
         });
 
-        result.consumeStream();
-
-        result.mergeIntoDataStream(dataStream, {
-          sendReasoning: true,
-        });
+        try {
+          await result.consumeStream();
+        } catch (streamError) {
+          console.error("Error consuming stream:", streamError);
+          throw streamError;
+        }
       },
-      onError: () => {
+      onError: (error) => {
+        console.error("createDataStreamResponse error:", error);
         return 'Oops, an error occurred!';
       },
     });
   } catch (error) {
+    console.error("POST handler error:", error);
     return new Response('An error occurred while processing your request!', {
-      status: 404,
+      status: 500,
     });
   }
 }
