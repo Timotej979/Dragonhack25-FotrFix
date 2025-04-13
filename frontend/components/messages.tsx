@@ -33,18 +33,12 @@ function PureMessages({
   return (
     <div
       ref={messagesContainerRef}
-      className={`flex flex-col min-w-0 gap-6 overflow-y-auto pb-4 ${
-          messages.length === 0 ? 'justify-center items-center h-full' : 'flex-1'
+      className={`flex flex-col min-w-0 gap-6 overflow-y-auto pt-4 ${
+        messages.length === 0 ? 'justify-end flex-1' : 'flex-1'
       }`}
-      id="messages-container"
     >
-      {messages.length === 0 && (
-        <div className="flex items-center justify-center w-full py-8 h-full absolute bottom-10">
-          <Greeting />
-        </div>
-      )}
-      
-      {messages.length > 0 && <div className="h-4" />} {/* Top space for messages */}
+      {/* Pass "minimized" prop to Greeting when at least one message exists */}
+      <Greeting minimized={messages.length > 0} />
 
       {messages.map((message, index) => (
         <PreviewMessage
@@ -69,8 +63,7 @@ function PureMessages({
 
       <div
         ref={messagesEndRef}
-        className="shrink-0 min-w-[24px] min-h-[40px]"
-        id="messages-end-anchor"
+        className="shrink-0 min-w-[24px] min-h-[24px]"
       />
     </div>
   );

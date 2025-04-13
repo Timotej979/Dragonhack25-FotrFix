@@ -34,7 +34,7 @@ export const Greeting = ({ minimized = false }: GreetingProps) => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
+    <div className="w-full flex flex-col items-center justify-center pb-4">
       {!minimized && (
       <motion.div
         key={index}
@@ -42,7 +42,7 @@ export const Greeting = ({ minimized = false }: GreetingProps) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
         transition={{ duration: 0.3 }}
-        className="relative bg-white text-black text-lg px-4 py-2 rounded-xl shadow-md border border-zinc-300 max-w-[100%] max-h-[20%] text-center mb-[-50px]"
+        className="mt-48 relative bg-white text-black text-lg px-4 py-2 rounded-xl shadow-md border border-zinc-300 max-w-[80%] text-center mb-[-50px]"
       >
         {greetings[index]}
         <div className="absolute left-[60%] -bottom-2 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white" />
@@ -57,8 +57,8 @@ export const Greeting = ({ minimized = false }: GreetingProps) => {
       initial="normal"
       animate={minimized ? 'minimized' : 'normal'}
       transition={{ delay: minimized ? 0 : 0.5 }}
-      className={`flex-grow mt-4 w-[50%] h-[60%] rounded-xl shadow-lg ${
-        !minimized ? 'max-w-[50%] sm:max-w-[35%] md:max-w-[20%] lg:max-w-[15%]' : 'max-w-[50%]'
+      className={`mt-4 w-[50%] h-[60%] rounded-xl shadow-lg ${
+        !minimized ? 'max-w-[70%] sm:max-w-[35%] md:max-w-[20%] lg:max-w-[15%]' : 'max-w-[50%]'
       }`}
       />
     </div>
