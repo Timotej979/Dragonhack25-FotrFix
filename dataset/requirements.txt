@@ -1,5 +1,4 @@
+google-genai
+pinecone
 PyPDF2
-voyageai
-elasticsearch
-tiktoken
 python-dotenv
