@@ -6,7 +6,7 @@ gunicorn==20.1.0
 psycopg2-binary==2.9.6
 boto3==1.28.1
 flask==2.2.2
-requests==2.28.2
+requests==2.32.4
 werkzeug==2.2.2
 sqlalchemy==1.4.37
 aiohttp==3.8.1
